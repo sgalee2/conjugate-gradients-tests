@@ -9,10 +9,11 @@ from scipy.spatial.distance import cdist
 from gpytorch.utils import linear_cg_k, pivoted_cholesky
 from sklearn.preprocessing import MinMaxScaler
 
+import os
 
 #load data sets
 def load_protein(tensor=False, info=False):
-    data = loadmat(r'C:\Users\adayr\OneDrive\Documents\data-sets\Data Sets\Raw Data\MATLAB Files\protein.mat')['data']
+    data = loadmat('..\MATLAB Files\protein.mat')['data']
     if info:
         print("--------------------")
         print("Protein data-set info...\n")
@@ -26,7 +27,7 @@ def load_protein(tensor=False, info=False):
     return data
     
 def load_elevator(tensor=False, info=False):
-    data = loadmat(r'C:\Users\adayr\OneDrive\Documents\data-sets\Data Sets\Raw Data\MATLAB Files\elevators.mat')['data']
+    data = loadmat('..\MATLAB Files\elevators.mat')['data']
     if info:
         print("--------------------")
         print("Elevator data-set info...\n")
@@ -40,7 +41,7 @@ def load_elevator(tensor=False, info=False):
     return data
 
 def load_bike(tensor=False, info=False):
-    data = loadmat(r'C:\Users\adayr\OneDrive\Documents\data-sets\Data Sets\Raw Data\MATLAB Files\bike.mat')['data']
+    data = loadmat('..\MATLAB Files\bike.mat')['data']
     if info:
         print("--------------------")
         print("Bike data-set info...\n")
@@ -54,7 +55,7 @@ def load_bike(tensor=False, info=False):
     return data
 
 def load_road(tensor=False, info=False):
-    data = loadmat(r'C:\Users\adayr\OneDrive\Documents\data-sets\Data Sets\Raw Data\MATLAB Files\3droad.mat')['data']
+    data = loadmat('..\MATLAB Files\3droad.mat')['data']
     if info:
         print("--------------------")
         print("3D Road data-set info...\n")
@@ -68,7 +69,7 @@ def load_road(tensor=False, info=False):
     return data
 
 def load_audio(tensor=False, info=False):
-    data = loadmat(r'C:\Users\adayr\OneDrive\Documents\data-sets\Data Sets\Raw Data\MATLAB Files\audio_data.mat')
+    data = loadmat('..\MATLAB Files\audio_data.mat')
     data = np.hstack([data['xfull'], data['yfull']])
     if info:
         print("--------------------")
