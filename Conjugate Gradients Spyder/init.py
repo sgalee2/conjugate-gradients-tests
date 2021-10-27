@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 
 import gpytorch
 import torch
+import seaborn
+import pandas
 
 from scipy.io import loadmat
 from scipy.spatial.distance import cdist
-from gpytorch.utils import linear_cg_k, pivoted_cholesky
+from gpytorch.utils import linear_cg, pivoted_cholesky
 from sklearn.preprocessing import MinMaxScaler
 
 import os
@@ -41,7 +43,7 @@ def load_elevator(tensor=False, info=False):
     return data
 
 def load_bike(tensor=False, info=False):
-    data = loadmat('..\MATLAB Files\bike.mat')['data']
+    data = loadmat('../MATLAB Files/bike.mat')['data']
     if info:
         print("--------------------")
         print("Bike data-set info...\n")
@@ -55,7 +57,7 @@ def load_bike(tensor=False, info=False):
     return data
 
 def load_road(tensor=False, info=False):
-    data = loadmat('..\MATLAB Files\3droad.mat')['data']
+    data = loadmat(r'..\MATLAB Files\3droad.mat')['data']
     if info:
         print("--------------------")
         print("3D Road data-set info...\n")
@@ -69,7 +71,7 @@ def load_road(tensor=False, info=False):
     return data
 
 def load_audio(tensor=False, info=False):
-    data = loadmat('..\MATLAB Files\audio_data.mat')
+    data = loadmat(r'..\MATLAB Files\audio_data.mat')
     data = np.hstack([data['xfull'], data['yfull']])
     if info:
         print("--------------------")
@@ -136,6 +138,23 @@ def load_2dtoy(lengthscale = None, noise = None, ARD = False, tensor=False, info
         print("--------------------")
     return data
 
+#scaler for input features
 def max_min_scale(X):
     scaler = MinMaxScaler()
     return scaler.fit_transform(X)
+
+#extract information from a cg run
+def cg_test(routine, A, b, sol, pmvm=None):
+    if pmvm is not None:
+        cg_run = routine(A, b, pmvm=pmvm)
+    else:
+        cg_run = routine(A, b)
+    x_m, info, m = cg_run
+    error = np.linalg.norm(x_m - sol)
+    return m, error
+    
+
+
+
+
+
