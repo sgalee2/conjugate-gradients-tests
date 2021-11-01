@@ -153,8 +153,8 @@ def cg_test(routine, A, b, sol, pmvm=None):
     error = np.linalg.norm(x_m - sol)
     return m, error
     
-
-
-
-
-
+def optimal_precon(C, rank):
+    vals, vecs = np.linalg.eig(C)
+    basis = vecs[:,0:rank]
+    diag = np.diag(vals[0:rank])
+    return basis @ diag @ basis.T
