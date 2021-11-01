@@ -90,17 +90,25 @@ def cg_(data_call, lengthscale_range, noise_range, kernel, ARD=False, n=1000):
         res = pandas.DataFrame( res[1:], columns=['Lengthscales', 'Noise', 'Iterations'])
         print("Tests complete...\n")
         return res
+
+
+def heatplot(data0, data1, title, ls_, sig_):
+    f, ax = plt.subplots(1, 3, figsize=[18,9], gridspec_kw={'width_ratios':[1,1,0.08]})
+    f.suptitle(title)
+    ax[0].set_title("No ARD")
+    ax[1].set_title("ARD")
+    h1 = seaborn.heatmap(np.log10(data0), ax = ax[0], cbar=False, cmap = 'Reds', vmin=0, vmax=vmax, )
+    h2 = seaborn.heatmap(np.log10(data1), ax = ax[1], cmap = 'Reds', vmin=0, vmax=vmax, cbar_ax=ax[2])
+    ax[1].set_yticks([])
+    ax[1].set_ylabel('')
     
-def cg_heatplot(cg_, ls_, sig_, title):
-    
-    plt.figure(figsize=[12,8])
-    heat_map = cg_.pivot('Lengthscales', 'Noise', 'Iterations')
-    plot = seaborn.heatmap(np.log10(heat_map), cmap='Reds', vmin=0, vmax=2)
-    plt.title(title)
     
 ls_ = [10 ** i for i in range(-4,4)]
 sig_ = [10 ** i for i in range(-2, 4)]
-n = 2000
+n = 1000
 vmax = int(np.log10(n)) + 1
 
-print(cg_(load_audio, ls_, sig_, RBFKernel, ARD=1, n=10))
+cg_1 = cg_(load_2dtoy, ls_, sig_, RBFKernel, ARD = False, n=n).pivot('Lengthscales', 'Noise', 'Iterations')
+cg_2 = cg_(load_2dtoy, ls_, sig_, RBFKernel, ARD = True, n=n).pivot('Lengthscales', 'Noise', 'Iterations')
+
+heatplot(cg_1, cg_2, "egg", ls_, sig_)
