@@ -10,5 +10,3 @@ from init import *
 from linear_conjugate_gradients import *
 import sklearn.datasets as dt
 
-
-

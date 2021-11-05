@@ -13,27 +13,36 @@ from init import *
 
 data = load_elevator()
 
-n_train = 4000
+n_train = 1000
 train_x, train_y = max_min_scale(data[0:n_train, :-1]), data[0:n_train, -1:]
 
-l_1 = [0.6 for i in range(len(train_x[0]))]
-sigma_1 = 1.0
+l = [0.6 for i in range(len(train_x[0]))]
+sigma = 1.0
 
-K = form_cov(train_x, l_1)
-K_hat = K + sigma_1 ** 2 * np.eye(n_train)
+K = form_cov(train_x, l)
+K_hat = K + sigma ** 2 * np.eye(n_train)
+vals, vecs = np.linalg.eig(K)
 
-cg_1 = p_cg(K_hat, train_y)
-sol_1, its_1 = cg_1[0], cg_1[2]
+n_comps = [i+1 for i in range(int(np.sqrt(n_train) + 1))]
+fro_norm = []
 
-l_2 = np.random.uniform(0.2,5.0,size=[len(train_x[0])])
-sigma_2 = np.random.normal(2.0, 0.2)
+cg_ = p_cg(K_hat, train_y)
+its = cg_[2]
+pcg_its = []
 
-K = form_cov(train_x, l_2)
-K_hat = K + sigma_2 ** 2 * np.eye(n_train)
+for i in n_comps:
+    D, Sig = np.diag( vals[0:i] ), vecs[:, 0:i]
+    Approx = Sig @ D @ Sig.T + sigma ** 2 * np.eye(n_train)
+    fro_norm.append( np.linalg.norm(K_hat - Approx, 'fro') )
+    pcg_ = p_cg(K_hat, train_y, pmvm=np.linalg.inv(Approx))
+    pcg_its.append(pcg_[2])    
+    
+plt.figure(figsize=[20,10])
+plt.scatter(n_comps, pcg_its, color='blue', marker='x')
+plt.plot(n_comps, fro_norm, color='red')
+plt.plot(n_comps, [its for i in range(len(n_comps))],'--', color='black')
+plt.xlabel("Matrix rank")
+plt.ylabel("Frobenius norm of $K_{hat} - Approx$")
+plt.title("Comparing approximation rank against accuracy.")
 
-cg_2 = p_cg(K_hat, train_y, guess=sol_1)
-sol_2, its_2 = cg_2[0], cg_2[2]
 
-print("Iterations for run 1:", its_1)
-print("Iterations for run 2:", p_cg(K_hat, train_y)[2])
-print("Iterations for run 2 with GUESS = sol_1:", its_2)
