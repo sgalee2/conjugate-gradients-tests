@@ -30,6 +30,12 @@ Version 0.11:
     
     - Amended issues with p_cg, should now work with any viable preconditioner matrix
     
+Version 1.00:
+    
+    - Removed non preconditioned version
+    - PCG without preconditioner uses no_precon
+    - Fixed some issues with numerical error in testing residual
+    
 """
 import numpy as np
 
