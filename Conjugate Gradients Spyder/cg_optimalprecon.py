@@ -13,7 +13,7 @@ import pandas
 
 ls_ = [10 ** i for i in range(-4,4)]
 sig_ = [10 ** i for i in range(-2, 4)]
-n = 100
+n = 1000
 vmax = int(np.log10(n)) + 1
 
 cg_1 =  cg_(load_protein, ls_, sig_, form_cov, ARD = 1, n=n)
@@ -22,4 +22,4 @@ pcg_1 = cg_(load_protein, ls_, sig_, form_cov, ARD = 1, n=n, p_strat = optimal_p
 vals = cg_1.values
 cg_1['Iterations'] -= pcg_1['Iterations']
 
-print(cg_1)
+print(cg_1.pivot('Lengthscales', 'Noise', 'Iterations'))

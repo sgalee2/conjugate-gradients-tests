@@ -189,7 +189,8 @@ def cg_(data_call, lengthscale_range, noise_range, kernel, ARD=False, n=1000, p_
                 #compute exact solution for error comparison
                 sol = np.linalg.inv(K_hat) @ train_y
                 if p_strat is not None:
-                    pmvm = np.linalg.inv(p_strat(K_XX, rank) + sigma ** 2 * np.eye(n))
+                    precon, inv_strat = p_strat(K_XX, rank)
+                    pmvm = inv_strat(precon + sigma ** 2 * np.eye(n))
                 else:
                     pmvm = None
                 #run cg
@@ -217,7 +218,12 @@ def cg_(data_call, lengthscale_range, noise_range, kernel, ARD=False, n=1000, p_
                 #compute exact solution for error comparison
                 sol = np.linalg.inv(K_hat) @ train_y
                 #run cg
-                cg_run = cg_test(p_cg, K_hat, train_y, sol=sol)
+                if p_strat is not None:
+                    precon, inv_strat = p_strat(K_XX, rank)
+                    pmvm = inv_strat(precon + sigma ** 2 * np.eye(n))
+                else:
+                    pmvm = None
+                cg_run = cg_test(p_cg, K_hat, train_y, sol=sol, pmvm=pmvm)
                 #store results
                 results = [[np.log10(lengthscale_range[i]), np.log10(sigma), cg_run[0]]]
                 res = np.vstack([res, results])
@@ -263,4 +269,6 @@ def optimal_precon(C, rank):
     basis = vecs[:,0:rank]
     diag = np.diag(vals[0:rank])
     
-    return basis @ diag @ basis.T
+    return basis @ diag @ basis.T, np.linalg.inv
+
+    
