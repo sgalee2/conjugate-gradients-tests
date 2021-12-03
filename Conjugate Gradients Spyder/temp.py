@@ -1,7 +1,11 @@
 import numpy as np
 import torch
 import gpytorch
+import matplotlib
 
+from matplotlib import pyplot as plt
+
+from gpytorch.utils import linear_cg_k
 from gpytorch.kernels import RBFKernel
 from gpytorch.utils import pivoted_cholesky
 from scipy.spatial.distance import cdist
@@ -9,40 +13,40 @@ from time import time
 from linear_conjugate_gradients import *
 from init import *
 
+font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 22}
+
+matplotlib.rc('font', **font)
+
 #np.random.seed(123)
 
-data = load_elevator()
+#set up data
+n_min = 10
+n_max = 10000
+n_range = np.linspace(n_min,n_max, 101)
+x = np.vstack(np.linspace(0.0,100.0,n_max))
+y_true = 0.1 * x * np.exp(-np.sin(x))
+y_noise = y_true + np.random.normal(loc=0.0, scale=2.0, size=[n_max,1])
 
-n_train = 1000
-train_x, train_y = max_min_scale(data[0:n_train, :-1]), data[0:n_train, -1:]
+#shuffle data
+data = np.hstack([x, y_noise])
+np.random.shuffle(data)
+x, y = data[:, :-1], data[:, -1:]
 
-l = [0.6 for i in range(len(train_x[0]))]
-sigma = 1.0
+#form full covariance matrix
+K_full = form_cov(x, 1.0) + np.eye(n_max)
+t_pcg = []
 
-K = form_cov(train_x, l)
-K_hat = K + sigma ** 2 * np.eye(n_train)
-vals, vecs = np.linalg.eig(K)
+for i in n_range:
+    i_ = int(i)
+    print("Setting n=",i_)
+    t_1 = time()
+    lin_cg(K_full[0:i_,0:i_], y[0:i_])
+    t_2 = time()
+    t = t_2 - t_1
+    t_pcg.append(t)
+    print("Completed in:",t,"seconds.\n")
 
-n_comps = [i+1 for i in range(int(np.sqrt(n_train) + 1))]
-fro_norm = []
-
-cg_ = p_cg(K_hat, train_y)
-its = cg_[2]
-pcg_its = []
-
-for i in n_comps:
-    D, Sig = np.diag( vals[0:i] ), vecs[:, 0:i]
-    Approx = Sig @ D @ Sig.T + sigma ** 2 * np.eye(n_train)
-    fro_norm.append( np.linalg.norm(K_hat - Approx, 'fro') )
-    pcg_ = p_cg(K_hat, train_y, pmvm=np.linalg.inv(Approx))
-    pcg_its.append(pcg_[2])    
-    
-plt.figure(figsize=[20,10])
-plt.scatter(n_comps, pcg_its, color='blue', marker='x')
-plt.plot(n_comps, fro_norm, color='red')
-plt.plot(n_comps, [its for i in range(len(n_comps))],'--', color='black')
-plt.xlabel("Matrix rank")
-plt.ylabel("Frobenius norm of $K_{hat} - Approx$")
-plt.title("Comparing approximation rank against accuracy.")
-
-
+t_ = np.array(t_pcg)
+np.save('pcg_time', t_)
