@@ -30,6 +30,16 @@ class stationary():
         self.sig = [1.0]
         self.theta = np.hstack([self.sig, self.lengthscales])
         
+    def set_lengthscales(self, lengthscales):
+        if type(lengthscales) == float:
+            lengthscales = [lengthscales]
+        if len(lengthscales) == self.ARD_dims:
+            self.lengthscales = lengthscales
+        elif len(lengthscales) == 1:
+            self.lengthscales = [lengthscales for i in range(self.ARD_dims)]
+        else:
+            raise TypeError("Number of inputs does not match ARD dimensions")
+        
     def sq_dist(self, X1, X2):
         """
         Parameters
@@ -74,6 +84,4 @@ class stationary():
         
         """
         raise NotImplementedError
-    
-    
-    
+
